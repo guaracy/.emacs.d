@@ -1,0 +1,462 @@
+#+TITLE: Configuração do Emacs
+#+AUTHOR: Guaracy Monteiro
+#+EMAIL: guaracy.bm@gmail.com
+
+#+STARTUP: showeverything
+#+STARTUP: indent
+
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="css/htmlize.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="css/readtheorg.css"/>
+#+HTML_HEAD: <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+#+HTML_HEAD: <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+#+HTML_HEAD: <script type="text/javascript" src="js/readtheorg.js"></script>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="kbd-style.css"/>
+
+* Introdução
+
+O objetivo deste documento é gerar um arquivo de configuração para o Emacs utilizando [[http://howardism.org/Technical/Emacs/literate-programming-tutorial.html][Literate Programming]], isto é, iremos escrever a documentação e o código e depois o código será extraído automaticamente gerando o arquivo *init.el*.
+
+É a configuração que eu estou utilizando no momento. Quaisquer alterações serão feitas neste documento e um novo arquivo *init.el* será gerado após as alterações. O arquivo *~/.emacs.d/init.el* será avaliado quando o emacs iniciar. Ao pressionar =Ctrl+c= =Ctrl+v= =t=, todos os blocos deste documento serão gravados no arquivo init.el. Em configurações manuais, pode ser interessante colocar configurações complexas em arquivos separados, o que não seria difícil de gerar em um documento *.org*.
+
+Esta configuração não é para os usuários do [[http://www.vim.org/][Vim]] (pelo menos no início). Se você é um feliz usuário do Vim e deseja aprender [[https://www.gnu.org/software/emacs/][Emacs]] para usar suas facilidades como o [[http://orgmode.org/][Org-mode]], etc., você deverá visitar o [[https://github.com/syl20bnr/spacemacs][Spacemacs]], [[https://github.com/hzenginx/spacelite][Spacelite]], [[https://github.com/hlissner/.emacs.d][Doom]] e outros. Eles configuram o Emacs de forma que você se sinta mais a vontade com relação aos atalhos do Vim e/ou visualmente.
+
+De qualquer forma, existem mais de 3.600 pacotes para você configurar seu Emacs para que fique mais adequado para o que você vai fazer. O melhor é você procurar na internet o que ou como os usuários configuraram o ambiente para uma determinada finalidade. Se você trabalha com Ruby, pode verificar como [[http://crypt.codemancers.com/posts/2013-09-26-setting-up-emacs-as-development-environment-on-osx/][este]] usuário configurou o ambiente dele. Ou uma configuração mais específica para [[https://stackoverflow.com/questions/7543428/configure-emacs-for-web-development-php#7543666][PHP]] ou para [[https://www.emacswiki.org/emacs/PythonProgrammingInEmacs][Python]], [[http://alchemist.readthedocs.io/en/latest/configuration/][Elixir]], [[https://wiki.haskell.org/Emacs][Haskell]], etc.. É a melhor configuração para ele mas já é um bom começo. No site sa [[http://sachachua.com/blog/category/geek/emacs/][Sacha]] sempre tem as novidades da semana que incluem pacotes, dicas, etc.. O melhor pode ser começar com alguma configuração existente, procurar por outras e ir adaptando para o seu gosto pessoal. 
+
+* Geração da configuração
+
+Poderíamos informar os pacotes desejados, [[http://www.wikemacs.org/wiki/Package.el][carregar]] todos os necessários e efetuarmos as configurações individuais em tópicos específicos para cada um. Usarei o [[https://github.com/jwiegley/use-package][use-package]] para manter a maioria da configuração dos pacotes agrupadas (menos as configurações para o org-mode que deixei para o final). 
+
+Para não gerar um determinado código para a configuração do pacote, utiliza-se *:tangle no*.
+
+
+
+* Arquivo init.el
+  :PROPERTIES:
+  :header-args:   :tangle ~/.emacs.d/init.el
+  :END:
+
+O que segue é o conteúdo disponibilizado para o arquivo *init.el*.
+
+** Aspecto visual
+
+Iremos definir tema, tamanho da janela e outros aspectos visuais.
+
+#+BEGIN_SRC emacs-lisp +n
+  ;; Gerado por:
+  ;; https://github.com/guaracy/.emacs.d
+  ;;
+  ;; tema
+  (load-theme 'misterioso)
+  ;; texto da barra de título
+  (setq frame-title-format '(buffer-file-name "%f" ("%b")))
+  ;; tamanho da janela
+  (setq initial-frame-alist
+        '((width . 130)
+          (height . 40)))
+  ;; elementos visuais
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+  ;; apresentação/entrada do texto
+  (setq inhibit-startup-message t)
+  (setq inhibit-splash-screen t)
+  (setq initial-scratch-message nil)
+  (setq truncate-lines t)
+  (show-paren-mode 1)
+  (setq-default indent-tabs-mode nil)
+  (setq-default tab-width 4)
+  (global-linum-mode t)
+  (global-hl-line-mode 1)
+  (ido-mode t)
+  ;; modeline
+  (line-number-mode 1)
+  (column-number-mode 1)
+  (setq initial-scratch-message
+        ";; Nada neste buffer será salvo. Use:\n;; Ctrl+x Ctrl+r / Ctrl+x Ctrl+f para ler um arquivo.\n")
+#+END_SRC
+
+** Repositórios
+
+Incluímos o [[https://melpa.org][MELPA]] que possui outros pacotes e/ou algumas versões atualizadas de pacotes existentes.
+
+#+BEGIN_SRC emacs-lisp +n -r
+  (require 'package)
+  (setq package-archives
+        '(("gnu" . "https://elpa.gnu.org/packages/")
+          ("melpa" . "http://melpa.org/packages/")))
+  (package-initialize)
+  (when (not package-archive-contents)
+    (package-refresh-contents))
+#+END_SRC
+
+** Instalação dos pacotes
+
+Para gerenciar as configurações dos pacotes iremos utilizar o [[https://github.com/jwiegley/use-package][use-package]] para deixar as coisas mais ordenadas. Não que seja necessário pois o arquivo será gerado automaticamente por este documento e, qualquer alteração, deverá ser feita por nele. Os pacotes que não estão instalados (caso algum seja incluído depois) serão automaticamente instalados e configurados pelo use-package.
+
+#+BEGIN_SRC emacs-lisp +n
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+  (require 'use-package)
+#+END_SRC
+
+#+begin_note
+Algumas opções do use-package:
+- *:ensure t* → indica que o pacote deverá ser baixado se não existir localmente
+- *:init* → configurações antes do pacote ser carregado
+- *:config* → configuração após o pacote ser carregado
+- *:bind* → criar um atalho para uma função
+- *:disabled* → desabilita o pacote
+#+END_NOTE
+
+*** [[https://github.com/justbur/emacs-which-key][which-key]]
+
+Mostra os atalhos disponíveis quando o usuário digita =Ctrl-x=, =Ctrl-c=, =Ctrl-h=, etc. e não digita imediatamente a sequência.
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package which-key
+    :ensure t
+    :config
+    (which-key-mode)
+    (setq which-key-idlw-delay 0.5))
+#+END_SRC
+
+***  [[https://github.com/nonsequitur/smex][smex]]
+
+Facilita a execução de comandos quando o usuário digita =Alt-x= (comandos gerais) ou =Alt-X= (comandos do modo atual do buffer).
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package smex
+    :ensure t
+    :bind (("M-x" . smex)
+           ("M-X" . smex-major-mode-commands)))
+#+END_SRC
+
+*** [[https://github.com/yoshida-mediba/hiwin-mode][hiwin]]
+
+Pode facilitar a visualização do buffer que estamos trabalhando quando existem vários abertos e visíveis.
+
+#+BEGIN_SRC emacs-lisp +n 
+  ;(use-package hiwin
+  ;  :ensure t
+  ;  :config
+  ;  (hiwin-activate)
+  ;  (set-face-background 'hiwin-face "Gray20")
+  ;  (set-face-foreground 'hiwin-face "Gray50"))
+#+END_SRC
+
+*** [[https://github.com/victorhge/iedit][iedit]]
+
+Parecido com [[https://github.com/magnars/multiple-cursors.el][multiple-cursors]], permite a edição simultânea de multiplas regiões. Pessoalmente, acho interessante o fato de =C-'= esconder o resto do texto para uma vizualização geral das ocorrências, editar apenas as ocorrências de uma função ou linha.
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package iedit
+    :ensure t
+    :bind (("C-;" . iedit-mode)
+           ("C-RET" . iedit-rectangle-mode)))
+#+END_SRC
+
+*** [[https://github.com/magnars/multiple-cursors.el][multiple-cursors]]
+
+Trabalha com multiplos cursores.
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package multiple-cursors
+    :ensure t
+    :bind (("C->" . mc/mark-next-like-this)
+           ("C-<" . mc/mark-previous-like-this)))
+#+END_SRC
+
+*** [[https://github.com/hniksic/emacs-htmlize][htmlize]]
+
+Permite exportar o conteúdo de um buffer para uma página .html com o mesmo tema utilizado pelo emacs bem como salientar a sintaxe dos fontes no org-mode. 
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package htmlize
+    :ensure t
+    :defer t)
+#+END_SRC
+
+*** [[https://github.com/larkery/ido-grid-mode.el][ido-grid-mode]]
+
+Apenas para combinar mais com a apresentação do which-key
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package ido-grid-mode
+    :ensure t
+    :config
+    (setq ido-enable-flex-matching t)
+    (setq ido-everywhere t)
+    (ido-mode t)
+    (ido-grid-mode t))
+#+END_SRC
+
+*** [[https://github.com/pjones/ido-select-window][ido-select-window]]
+
+Facilita a seleção da janela quando existem diversos buffers visualizados simultaneamente.
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package ido-select-window
+    :ensure t
+    :bind ("C-x o" . ido-select-window))
+#+END_SRC
+
+
+***  [[https://github.com/DarwinAwardWinner/ido-yes-or-no][ido-yes-or-no]]
+
+Facilita respostas com yes/no permitindo apenas o pressionamento de y/n e enter.
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package ido-yes-or-no
+    :ensure t
+    :config
+    (ido-yes-or-no-mode t))
+#+END_SRC
+
+*** [[https://github.com/auto-complete/auto-complete][auto-complete]]
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package auto-complete
+    :ensure t
+    :config
+    (ac-config-default))
+#+END_SRC
+
+*** [[https://github.com/guaracy/red.el][red.el]]
+
+Salientar sintaxe para arquivos Red e Red/System. Utilizo a cópia local.
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package red
+    :load-path "~/github/guaracy/red.el"
+    :config
+    (autoload 'red-mode "red.el" "Major mode for Red development" t)
+    (add-to-list 'auto-mode-alist '("\\.red$" . red-mode))
+    )
+#+END_SRC
+
+*** [[https://github.com/tom-tan/hlinum-mode][hlinum-mode]]
+
+Extende a seleção da linha atual para o número da linha. Veja outras configurações para [[https://www.emacswiki.org/emacs/LineNumbers][linum]]
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package hlinum
+    :ensure t
+    :config
+    (hlinum-activate))
+#+END_SRC
+
+*** [[https://github.com/mattfidler/linum-off][linum-off]]
+
+Desabilita número de linhas em determnados modos.
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package linum-off
+    :ensure t)
+#+END_SRC
+
+*** [[https://github.com/zk-phi/indent-guide][indent-guide]]
+
+Mostra uma linha para indentação do código para facilitar a visualização. Outra opção é o [[https://github.com/antonj/Highlight-Indentation-for-Emacs][highlight-indentention-for-Emacs]]
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package indent-guide
+    :ensure t
+    :config
+    (indent-guide-global-mode))
+#+END_SRC
+
+*** [[http://orgmode.org/][org-mode]]
+
+Mantenha a sua vida em um arquivo texto.
+
+#+BEGIN_SRC emacs-lisp +n
+  ;;(use-package org-mode
+  ;;  :defer t
+  ;;  :ensure t)
+#+END_SRC
+
+*** [[https://github.com/purcell/less-css-mode][less-css-mode]]
+
+Para edição de arquivo .less para gerar .css (como não gosto e não precisei de s[a|c]ass)
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package less-css-mode
+    :ensure t)
+#+END_SRC
+
+*** [[https://github.com/jaypei/emacs-neotree][neotree]]
+
+Permite a utilização do neotree para navegar no sistema de arquivos em vez do dired. Assinala =Ctrl-\= para mostrar/esconder neotree.
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package neotree
+    :ensure t
+    :bind ("C-\\" . neotree-toggle))
+#+END_SRC
+
+*** [[https://github.com/Malabarba/paradox][paradox]]
+
+Um gerenciador de pacotes melhorado.
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package paradox
+    :ensure t
+    :config
+    (paradox-enable))
+#+END_SRC
+
+*** [[https://github.com/magit/magit][magit]]
+
+Interface com o Git
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package magit
+    :ensure t
+    :bind ("C-x g" . magit-status))
+#+END_SRC
+
+*** [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]]
+
+Optei por utilizar apenas duas cores utilizando as cores do tema para *keyword* e *string*. 
+
+#+BEGIN_SRC emacs-lisp +n -r 
+  (use-package rainbow-delimiters
+    :ensure t
+    :config
+    (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+    (require 'color)
+    (defvar my-paren-dual-colors    (ref:sc-rd1)
+      '((face-attribute 'font-lock-string-face :foreground)
+        (face-attribute 'font-lock-keyword-face :foreground)))
+    (setq rainbow-delimiters-outermost-only-face-count 0)
+    (setq rainbow-delimiters-max-face-count 2)
+    (set-face-foreground 'rainbow-delimiters-depth-1-face
+                         (eval (elt my-paren-dual-colors 1)))
+    (set-face-foreground 'rainbow-delimiters-depth-2-face
+                         (eval (elt my-paren-dual-colors 0))) (ref:sc-rd2)
+                         )
+#+END_SRC
+
+#+begin_note
+Você pode deixar cada fechamento de delimitar de uma cor. Substitua da linha [[(sc-rd1)]] até a linha [[(sc-rd2)]] pelo código abaixo:
+#+BEGIN_SRC emacs-lisp :tangle no
+  (cl-loop
+   for index from 1 to rainbow-delimiters-max-face-count
+   do
+   (let ((face (intern (format "rainbow-delimiters-depth-%d-face" index))))
+     (cl-callf color-saturate-name (face-foreground face) 30)))
+#+END_SRC
+#+END_NOTE
+
+*** [[https://github.com/tumashu/el2org][el2org]] e [[https://github.com/larstvei/ox-gfm][ox-gfm]]
+
+O =el2org= é necessário para o =org-webpage= e o =ox-gfm= é necessário para =el2org=.
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package ox-gfm
+    :ensure t)
+  (use-package el2org
+    :ensure t)
+#+END_SRC
+
+*** [[https://github.com/tumashu/org2web][org-webpage]]
+
+Para gerenciamento do blog estático no github.
+
+#+BEGIN_SRC emacs-lisp +n
+  (use-package org-webpage
+    :ensure t
+    :defer t)
+  (org2web-add-project
+   '("cadafalso"
+     :repository-directory "~/projetos/org2blog"
+     :remote (git "https://github.com/guaracy/guaracy.github.com.git" "master")
+     :site-domain "http://guaracy.github.io/"
+     :site-main-title "Cadafalso"
+     :site-sub-title "Apenas mais um blog"
+     :default-category "blog"
+     :theme (org)
+     :source-browse-url ("Github" "https://github.com/guaracy/guaracy.github.com")
+     :web-server-port 7654))
+#+END_SRC
+
+** Configurações adicionais
+
+Algumas configurações deixadas para o final
+
+#+BEGIN_SRC emacs-lisp +n
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-support-shift-select t)
+  (setq org-support-shift-select 'always)
+  (setq org-html-htmlize-output-type 'css)
+  (setq org-src-fontify-natively t)
+  (setq org-export-default-language "pt_BR")
+  (add-hook 'org-mode-hook #'visual-line-mode)
+  (add-hook 'org-mode-hook #'toggle-word-wrap)
+  (add-to-list 'org-structure-template-alist '("t" "#+begin_tip ?\n\n#+end_tip"))
+  (add-to-list 'org-structure-template-alist '("n" "#+begin_note ?\n\n#+end_note"))
+  ;; linguagens utilizadas por org-babel
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (red . t)
+     (python . t)
+     (ruby . t)
+     (R . t)
+     (C . t)
+     (ditaa . t)
+     (shell . t)))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp +n
+  (defvar my-term-shell "/usr/bin/zsh")
+  (defadvice ansi-term (before force-bash)
+    (interactive (list my-term-shell)))
+  (ad-activate 'ansi-term)
+#+END_SRC
+
+
+** Definição de funções
+
+Agora a definição de algumas funções que achei úteis (YMMV)
+
+*** Abrir lista de arquivos recente (C-x C-r))
+
+#+BEGIN_SRC emacs-lisp +n
+  (require 'recentf)
+  (recentf-mode t)
+  (setq recentf-max-menu-items 25)
+  (defun recentf-ido-find-file ()
+    "Find a recent file using Ido."
+    (interactive)
+    (let ((file (ido-completing-read "Choose recent file: " recentf-list nil t)))
+      (when file
+        (find-file file))))
+  (global-set-key (kbd "C-x C-r") 'recentf-ido-find-file)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp +n -r
+  ;; ------  fim do arquivo de configuração (ref:sc-fim)
+#+END_SRC
+
+Pronto. E essas são as [[(sc-fim)]] linhas de configuração.
+
+* Dicas
+
+#+BEGIN_tip 
+Se for exportar para html =C-e= =h= e aparece a mensagem /Wrong type argument: listp, .../ pode ser suficiente digitar:
+
+=C-u= =M-x= org-reload
+#+end_tip
+
+#+BEGIN_tip 
+Se aparecer o erro: /Invalid function: org-babel-header-args-safe-fn/
+rodar o código abaixo
+#+BEGIN_SRC emacs-lisp
+  (byte-recompile-file
+       (expand-file-name "ob-R.el"
+                        (file-name-directory (locate-library "org")))
+       t)
+#+END_SRC
+#+end_tip
+
