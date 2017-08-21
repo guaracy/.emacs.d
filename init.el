@@ -53,13 +53,6 @@
   :bind (("M-x" . smex)
          ("M-X" . smex-major-mode-commands)))
 
-;(use-package hiwin
-;  :ensure t
-;  :config
-;  (hiwin-activate)
-;  (set-face-background 'hiwin-face "Gray20")
-;  (set-face-foreground 'hiwin-face "Gray50"))
-
 (use-package iedit
   :ensure t
   :bind (("C-;" . iedit-mode)
@@ -115,10 +108,6 @@
   :ensure t
   :config
   (indent-guide-global-mode))
-
-;;(use-package org-mode
-;;  :defer t
-;;  :ensure t)
 
 (use-package less-css-mode
   :ensure t)

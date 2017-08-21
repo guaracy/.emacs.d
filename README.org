@@ -131,19 +131,6 @@ Facilita a execução de comandos quando o usuário digita =Alt-x= (comandos ger
            ("M-X" . smex-major-mode-commands)))
 #+END_SRC
 
-*** [[https://github.com/yoshida-mediba/hiwin-mode][hiwin]]
-
-Pode facilitar a visualização do buffer que estamos trabalhando quando existem vários abertos e visíveis.
-
-#+BEGIN_SRC emacs-lisp +n 
-  ;(use-package hiwin
-  ;  :ensure t
-  ;  :config
-  ;  (hiwin-activate)
-  ;  (set-face-background 'hiwin-face "Gray20")
-  ;  (set-face-foreground 'hiwin-face "Gray50"))
-#+END_SRC
-
 *** [[https://github.com/victorhge/iedit][iedit]]
 
 Parecido com [[https://github.com/magnars/multiple-cursors.el][multiple-cursors]], permite a edição simultânea de multiplas regiões. Pessoalmente, acho interessante o fato de =C-'= esconder o resto do texto para uma vizualização geral das ocorrências, editar apenas as ocorrências de uma função ou linha.
@@ -263,16 +250,6 @@ Mostra uma linha para indentação do código para facilitar a visualização. O
     :ensure t
     :config
     (indent-guide-global-mode))
-#+END_SRC
-
-*** [[http://orgmode.org/][org-mode]]
-
-Mantenha a sua vida em um arquivo texto.
-
-#+BEGIN_SRC emacs-lisp +n
-  ;;(use-package org-mode
-  ;;  :defer t
-  ;;  :ensure t)
 #+END_SRC
 
 *** [[https://github.com/purcell/less-css-mode][less-css-mode]]
