@@ -128,10 +128,11 @@ Algumas opções do use-package:
 
 *** [[https://github.com/abo-abo/swiper][swiper]]
 
+Facilita a busca e localização no arquivo.
+
 #+BEGIN_SRC emacs-lisp +n
   (use-package swiper
     :ensure t)
-    ;;:bind ("C-s C-f" . swiper))
 #+END_SRC
 
 *** [[https://github.com/justbur/emacs-which-key][which-key]]
@@ -380,6 +381,13 @@ Interface com o Git
     :bind ("C-x g" . magit-status))
 #+END_SRC
 
+#+begin_tip 
+- =C-x g= magit-status
+- =s= stage
+- =c c= commit (mensagem mais =C-c C-c= para confirmar)
+- =P u= git push
+#+end_tip
+
 *** [[https://github.com/tumashu/el2org][el2org]] e [[https://github.com/larstvei/ox-gfm][ox-gfm]]
 
 O =el2org= é necessário para o =org-webpage= e o =ox-gfm= é necessário para =el2org=.
@@ -500,7 +508,7 @@ Pronto. E essas são as [[(sc-fim)]] linhas de configuração.
 
 * Adaptações <<adaptacao>>
 
-Como disse antes, serão necessárias algumas alterações. Se você não deseja algum pacote, você pode apenas excluir toda a parte existente no arquivo .org. Se você não quer no momento ou não sabe se será preciso, inclua =:disabled= antes de =:ensure t= como no [[dummy-pkg][exemplo]].
+Como disse antes, serão necessárias algumas alterações. Se você não deseja algum pacote, você pode apenas excluir toda a parte existente no arquivo .org. Se você não quer no momento ou não sabe se será preciso, inclua =:disabled= antes de =:ensure t=. 
 
 Leia a [[file:REDAME.html][documentação]] para ver o resumo de cada pacote e/ou seguir o link do pacote para maiores informações. 
 
