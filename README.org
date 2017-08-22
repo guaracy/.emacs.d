@@ -118,11 +118,6 @@ Algumas opções do use-package:
 - *:disabled* → desabilita o pacote sem a necessidade de excluí-lo do arquivo de configuração
 #+end_tip
 
-<<dummy-pkg>>
-*** [[https://github.com/coldnew/org-ioslide][org-ioslide]]
-
-Este pacote é apenas exemplo de como desabilitar algum pacote sem a necessidade comentá-lo ou excluí-lo. Apenas incluímos =:disabled=
-
 #+BEGIN_SRC emacs-lisp +n
   (use-package org-ioslide
     :disabled
